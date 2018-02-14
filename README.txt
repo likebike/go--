@@ -1,3 +1,5 @@
+Welcome to Go-- , a fork of Go that exports all symbols, so you can access EVERYTHING, like Python!
+Remember, with great power comes great responsibility.  Please don't complain if you're using a private API and it changes without notice.
 
 Go-- just consists of a handful (...like 5...) single-line edits to the Go src/ tree.
 Here is how you can see easily the diff:
@@ -27,11 +29,16 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     GOPATH=/path/to/your/GoPathDir go--/bin/go get github.com/bouk/monkey
 
     # We also have a copy of the monkey-patch library which matches our version of Go-- in case something changes or breaks.
-    # It is located in the 'upstream' branch.  You'd get it like this:
+    # It is located in the 'upstream' branch.  You'd install it like this:
     #
-    #   git checkout go1.9.4
-    #
-    # ...and then you'd probably use some kind of "go install" command, but I haven't tried it.  Good luck!
+    #   cd go--
+    #   git checkout upstream
+    #   GOPATH=$(go env GOPATH)
+    #   mkdir -p $GOPATH/src/github.com/bouk
+    #   mv monkey $GOPATH/src/github.com/bouk/
+    #   cd $GOPATH/src/github.com/bouk/monkey
+    #   go install
+
 
 
 
