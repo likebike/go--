@@ -9,8 +9,8 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
 
     # Note that, since Go is written in Go, you need to already have Go to build Go or Go--.
     # So you might find it convenient to download one of the binary distributions from https://golang.org/dl/
-    # Use the path of your already-installed Go for the GOROOT_BOOTSTRAP value:
-    export GOROOT_BOOTSTRAP="/path/to/your/GoDirectory"
+    # Use the GOROOT of your already-installed Go for the GOROOT_BOOTSTRAP value.  You can use "go env" to find this value:
+    export GOROOT_BOOTSTRAP="$GOROOT"
     export PATH="$GOROOT_BOOTSTRAP/bin:$PATH"
     which go   # Make sure we're using the bootstrap version of go.
 
@@ -20,7 +20,7 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     cd src
     ./make.bash
 
-    # That's it!  The result will be located at go--/bin/go .  Note that it's still called 'go' even though it's go-- .
+    # That's it!  The result will be located at go/bin/go .  Note that it's still called 'go' even though it's go-- .
     # I don't suggest that you re-name it to 'go--' because most tools expect it to be called 'go'.  Just set your PATH instead.
 
     # Here is the standard method to install the amazing monkey patch library:
