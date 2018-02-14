@@ -20,7 +20,7 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     cd src
     ./make.bash
 
-    # That's it!  The result will be located at go/bin/go .  Note that it's still called 'go' even though it's go-- .
+    # That's it!  The result will be located at ./go/bin/go .  Note that it's still called 'go' even though it's go-- .
     # I don't suggest that you re-name it to 'go--' because most tools expect it to be called 'go'.  Just set your PATH instead.
 
     # Here is the standard method to install the amazing monkey patch library:
