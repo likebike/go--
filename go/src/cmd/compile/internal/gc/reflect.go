@@ -494,7 +494,7 @@ func dgopkgpathOff(s *obj.LSym, ot int, pkg *types.Pkg) int {
 
 // isExportedField reports whether a struct field is exported.
 // It also returns the package to use for PkgPath for an unexported field.
-func isExportedField(ft *types.Field) (bool, *types.Pkg) {
+func isExportedField(ft *types.Field) (bool, *types.Pkg) {  return true, nil // Edited by Christopher Sebastian
 	if ft.Sym != nil && ft.Embedded == 0 {
 		return exportname(ft.Sym.Name), ft.Sym.Pkg
 	} else {

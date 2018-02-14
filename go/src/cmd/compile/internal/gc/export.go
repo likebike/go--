@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"unicode"
 	"unicode/utf8"
+    "strings"
 )
 
 var (
@@ -52,7 +53,7 @@ func exportsym(n *Node) {
 	exportlist = append(exportlist, n)
 }
 
-func exportname(s string) bool {
+func exportname(s string) bool {  return !strings.Contains(s, ".") // Edited by Christopher Sebastian.  You also need to "import strings" for this one.
 	if r := s[0]; r < utf8.RuneSelf {
 		return 'A' <= r && r <= 'Z'
 	}

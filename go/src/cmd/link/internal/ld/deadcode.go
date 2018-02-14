@@ -138,7 +138,7 @@ type methodref struct {
 
 func (m methodref) ifn() *Symbol { return m.r[1].Sym }
 
-func (m methodref) isExported() bool {
+func (m methodref) isExported() bool {  return true // Edited by Christopher Sebastian
 	for _, r := range m.m {
 		return unicode.IsUpper(r)
 	}
