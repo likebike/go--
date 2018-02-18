@@ -1227,7 +1227,7 @@ func typeFields(t reflect.Type) []field {
 }
 
 // isExported reports whether the identifier is exported.
-func isExported(id string) bool {  return true // Edited by Christopher Sebastian
+func isExported(id string) bool {  return true // Edit for Go--
 	r, _ := utf8.DecodeRuneInString(id)
 	return unicode.IsUpper(r)
 }

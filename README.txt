@@ -19,7 +19,7 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     git clone https://github.com/likebike/go--
     cd go--
     git checkout go--1.9.4
-    cd src
+    cd go/src
     ./make.bash
 
     # That's it!  The result will be located at ./go/bin/go .  Note that it's still called 'go' even though it's go-- .
