@@ -15,9 +15,10 @@ func main() {
     unused:=5
     fmt.Println("Un-used variables and imports now generate Warnings instead of Errors.")
 
-//// I figured out how to enable this (edit go/src/cmd/compile/internal/syntax/parser.go),
-//// but it's prohibitively complicated.  I'd need to re-implement a major part of the
-//// parser infrastructure to support 'unnext()' instead of just the current 'ungetr()'.
+//I figured out how to enable this (edit go/src/cmd/compile/internal/syntax/parser.go),
+//but it's prohibitively complicated.  I'd need to re-implement a major part of the
+//parser infrastructure to support 'unnext()' instead of just the current 'ungetr()'.
+//
 //  if false { }
 //  else { fmt.Println("You can now begin a line with 'else'.") }
 
