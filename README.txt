@@ -4,7 +4,7 @@ Remember, with great power comes great responsibility.  Please don't complain if
 Go-- just consists of several single-line edits to the Go src/ tree.
 Here is how you can easily see the diff:
 
-    git diff go1.9.4 go--1.9.4 go/
+    git diff go1.10 go--1.10 go/
 
 
 Here is a quick summary of how to build Go--.  It's exactly the same process as building normal Go:
@@ -18,7 +18,7 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
 
     git clone https://github.com/likebike/go--
     cd go--
-    git checkout go--1.9.4
+    git checkout go--1.10
     cd go/src
     ./make.bash
 
@@ -29,10 +29,9 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     GOPATH=/path/to/your/GoPathDir go--/bin/go get github.com/bouk/monkey
 
     # We also have a copy of the monkey-patch library which matches our version of Go-- in case something changes or breaks.
-    # It is located in the 'upstream' branch.  You'd install it like this:
+    # You'd install it like this:
     #
     #   cd go--
-    #   git checkout upstream
     #   GOPATH=$(go env GOPATH)
     #   mkdir -p $GOPATH/src/github.com/bouk
     #   mv monkey $GOPATH/src/github.com/bouk/
@@ -43,5 +42,5 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
 
 Other Notes:
     # I'm in China, so I often need to proxy my connections:
-    ALL_PROXY='socks5h://127.0.0.1:8080' curl -O 'https://dl.google.com/go/go1.9.4.src.tar.gz'
+    ALL_PROXY='socks5h://127.0.0.1:8080' curl -O 'https://dl.google.com/go/go1.10.src.tar.gz'
 
