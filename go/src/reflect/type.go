@@ -473,7 +473,7 @@ func (n name) data(off int, whySafe string) *byte {
 	return (*byte)(add(unsafe.Pointer(n.bytes), uintptr(off), whySafe))
 }
 
-func (n name) isExported() bool {
+func (n name) isExported() bool { return true // Go--
 	return (*n.bytes)&(1<<0) != 0
 }
 

@@ -364,6 +364,7 @@ func isEmptyFuncDecl(dcl Decl) bool {
 //        "{" { f sep } "}" . // sep is optional before ")" or "}"
 //
 func (p *parser) list(open, sep, close token, f func() bool) src.Pos {
+    p.pokeToken(open) // Go--
 	p.want(open)
 
 	var done bool
@@ -516,6 +517,7 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
 	f := new(FuncDecl)
 	f.pos = p.pos()
 
+    p.pokeToken(_Lparen) // Go--
 	if p.tok == _Lparen {
 		rcvr := p.paramList()
 		switch len(rcvr) {
@@ -529,6 +531,7 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
 		}
 	}
 
+    p.pokeToken(_Name) // Go--
 	if p.tok != _Name {
 		p.syntax_error("expecting name or (")
 		p.advance(_Lbrace, _Semi)
@@ -537,6 +540,8 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
 
 	f.Name = p.name()
 	f.Type = p.funcType()
+
+    p.pokeToken(_Lbrace) // Go--
 	if p.tok == _Lbrace {
 		f.Body = p.funcBody()
 	}
@@ -1207,6 +1212,7 @@ func (p *parser) funcResult() []*Field {
 		defer p.trace("funcResult")()
 	}
 
+    p.pokeToken(_Lparen) // Go--
 	if p.tok == _Lparen {
 		return p.paramList()
 	}
@@ -1819,6 +1825,48 @@ done:
 	return
 }
 
+
+// Convenience method for Go-- :
+func (p *parser) peekToken(tok token) bool {
+    if p.tok==tok { return true }
+    tokStartI:=p.scanner.source.r
+    for ; tokStartI<len(p.scanner.source.buf); tokStartI++ {
+        c:=p.scanner.source.buf[tokStartI]
+        if c==' ' || c=='\t' || c=='\n' || c=='\r' || c==';' { continue }
+        break
+    }
+    if tok==_Name {
+        // A 'name' token can match any identifier, not just the string "name".
+        if tokStartI>=len(p.scanner.source.buf) { return false }
+        if !p.scanner.isIdentRune(rune(p.scanner.source.buf[tokStartI]),true) { return false } // Just test the first char.
+    } else {
+        var I int
+        for i,b:=range []byte(tokstrings[tok]) {
+            I=i
+            if tokStartI+i>=len(p.scanner.source.buf) { return false }
+            if p.scanner.source.buf[tokStartI+i]!=b { return false }
+        }
+        // The token matched the buffer!
+        switch tok {
+        case _Lparen,_Lbrace,_Lbrack: // Nothing extra for structural tokens.
+        case _Else:
+            // Make sure the input keyword has ended to avoid getting confused by variable names like 'elseList':
+            if tokStartI+I+1<len(p.scanner.source.buf) && p.scanner.isIdentRune(rune(p.scanner.source.buf[tokStartI+I+1]),false) { return false }
+        default: panic(fmt.Errorf("Unrecognized token: %s", tok))
+        }
+    }
+    return true
+}
+func (p *parser) pokeToken(tok token) {
+    if !(p.tok==_Semi && p.lit=="newline") { return }
+    if !p.peekToken(tok) { return }
+    for p.tok!=tok {
+        if p.tok!=_Semi { panic(fmt.Errorf("I should never skip this type of token: %s", p.tok)) }
+        p.next()
+        if p.tok==_EOF { panic(fmt.Errorf("Expected to find '%s' but reached EOF!", tokstrings[tok])) }
+    }
+}
+
 func (p *parser) ifStmt() *IfStmt {
 	if trace {
 		defer p.trace("ifStmt")()
@@ -1829,6 +1877,8 @@ func (p *parser) ifStmt() *IfStmt {
 
 	s.Init, s.Cond, _ = p.header(_If)
 	s.Then = p.blockStmt("if clause")
+
+    p.pokeToken(_Else) // Go-- support for `if cond {...} \n else {...}` syntax.
 
 	if p.got(_Else) {
 		switch p.tok {
