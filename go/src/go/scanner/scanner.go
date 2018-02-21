@@ -132,6 +132,18 @@ func (s *Scanner) Init(file *token.File, src []byte, err ErrorHandler, mode Mode
 	if s.ch == bom {
 		s.next() // ignore BOM at file beginning
 	}
+
+    // Go-- support for 'shebang' lines:
+    if s.ch=='#' {
+        reset:=func(ch rune, offset, rdOffset int) { s.ch,s.offset,s.rdOffset = ch,offset,rdOffset } // Logic based on findLineEnd().
+        peek:=func() rune {
+            defer reset(s.ch, s.offset, s.rdOffset)
+            s.next()
+            return s.ch
+        }
+        skipLine:=func() { for s.ch>=0 && s.ch!='\n' { s.next() } }
+        if peek()=='!' { skipLine() }
+    }
 }
 
 func (s *Scanner) error(offs int, msg string) {

@@ -56,6 +56,12 @@ func (s *scanner) next() {
 	nlsemi := s.nlsemi
 	s.nlsemi = false
 
+    // Go-- support for 'shebang' lines:
+    if s.source.line0<=linebase && s.source.col0<=colbase {  // BOM does not affect 'col'.
+        if s.getr()=='#' && s.source.r<len(s.source.buf) && s.source.buf[s.source.r]=='!' { s.skipLine('#')
+        } else { s.ungetr() }
+    }
+
 redo:
 	// skip white space
 	c := s.getr()
