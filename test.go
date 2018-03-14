@@ -41,10 +41,10 @@ func main() {
     var a,b T1; a.n1,a.n2=8,9
     bs,err:=json.Marshal(a); if err!=nil { panic(err) }
     err=json.Unmarshal(bs, &b); if err!=nil { panic(err) }
-    if b.n1!=8 || b.n2!=9 { panic("json was unable to set unexported field!") }
+    if b.n1!=8 || b.n2!=9 { panic("json was unable to read/set unexported field!") }
     fmt.Println("    * encoding/json can un/marshal unexported fields.\n")
 
-    if false { }  // Comments here are fine too.
+    if 0>1 { }  // Comments here are fine too.
     else { fmt.Println("    * More flexible whitespace in 'if' statements; `if cond {...} \\n else {...}` is now a valid syntax.\n") }
 
     three,four:=a.crazy_func_style(1,2); if three!=3 || four!=4 { panic("Incorrect crazy_func_style outputs!") }

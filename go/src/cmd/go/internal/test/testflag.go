@@ -87,6 +87,7 @@ func init() {
 //	go test fmt -custom-flag-for-fmt-test
 //	go test -x math
 func testFlags(args []string) (packageNames, passToTest []string) {
+	testVetList="off"  // Go-- and vet are not friends.  Disable by default.
 	inPkg := false
 	var explicitArgs []string
 	for i := 0; i < len(args); i++ {

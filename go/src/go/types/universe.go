@@ -10,6 +10,7 @@ import (
 	"go/constant"
 	"go/token"
 	"strings"
+    "go/ast"  // For Go--
 )
 
 var (
@@ -211,7 +212,8 @@ func def(obj Object) {
 	}
 	// exported identifiers go into package unsafe
 	scope := Universe
-	if obj.Exported() {
+	//if obj.Exported() {                  // Edit for Go-- .  Without this, it doesn't know how to handle predeclared Consts like 'true'.
+	if ast.OrigIsExported(obj.Name()) {    //
 		scope = Unsafe.scope
 		// set Pkg field
 		switch obj := obj.(type) {

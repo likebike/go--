@@ -2153,7 +2153,7 @@ func typecheck1(n *Node, top int) *Node {
 
 	if (top&Etop != 0) && top&(Ecall|Erv|Etype) == 0 && ok&Etop == 0 {
 		if !n.Diag() {
-			yyerror("%v evaluated but not used", n)
+			yyerror("%v evaluated but not used", n)  // Go-- Note: If we change this to 'Warn' it results in an internal compiler error, so just leave it as 'yyerror'.
 			n.SetDiag(true)
 		}
 
