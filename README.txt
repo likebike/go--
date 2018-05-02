@@ -28,16 +28,6 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     # Here is the standard method to install the amazing monkey patch library:
     GOPATH=/path/to/your/GoPathDir go--/bin/go get github.com/bouk/monkey
 
-    # We also have a copy of the monkey-patch library which matches our version of Go-- in case something changes or breaks.
-    # You'd install it like this:
-    #
-    #   cd go--
-    #   GOPATH=$(go env GOPATH)
-    #   mkdir -p $GOPATH/src/github.com/bouk
-    #   mv monkey $GOPATH/src/github.com/bouk/
-    #   cd $GOPATH/src/github.com/bouk/monkey
-    #   go install
-
 
 Here is how we upgrade when new versions of Go are released:
 
