@@ -68,8 +68,8 @@ Here is how we upgrade when new versions of Go are released:
     git diff upstream go/ >diffs/v$NEW_VERSION
     git add diffs/v$NEW_VERSION
     git commit -a -m"Upgrade to v$NEW_VERSION"
+    git push --all
     git tag go--$NEW_VERSION
-    git push
     git push --tags
 
 
