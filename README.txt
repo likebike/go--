@@ -39,8 +39,41 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
     #   go install
 
 
+Here is how we upgrade when new versions of Go are released:
+
+    OLD_VERSION=1.10
+    NEW_VERSION=1.10.2
+
+    # First, generate the current Go-- diff:
+    git checkout go--
+    git diff upstream go/ >diffs/v$OLD_VERSION
+    git add diffs/v$OLD_VERSION
+    git commit -m"Generate diff of v$OLD_VERSION before upgrade to v$NEW_VERSION"
+
+    # Next, upgrade the 'upstream' branch:
+    git checkout upstream
+    rm -r go
+    curl "https://dl.google.com/go/go${NEW_VERSION}.src.tar.gz" | tar x     # Creates the new 'go' directory.
+    git diff                            # Review changes briefly, just to get an idea of their scope.
+    git add go                          # Add new files.
+    git status                          # Make sure nothing is forgotten.
+    git commit -m"Upgrade to v$NEW_VERSION"
+
+    # Re-apply Go-- edits.  You need to re-think each one while applying it:
+    git checkout go--
+    git merge upstream
+    vim diff/v$OLD_VERSION   # Use a vsplit and Manually review/re-apply edits from diff.
+    git diff                 # Review
+    git diff upstream        # Review
+    git diff upstream go/ >diffs/v$NEW_VERSION
+    git add diffs/v$NEW_VERSION
+    git commit -a -m"Upgrade to v$NEW_VERSION"
+    git tag go--$NEW_VERSION
+    git push
+    git push --tags
+
 
 Other Notes:
     # I'm in China, so I often need to proxy my connections:
-    ALL_PROXY='socks5h://127.0.0.1:8080' curl -O 'https://dl.google.com/go/go1.10.src.tar.gz'
+    ALL_PROXY='socks5h://127.0.0.1:1080' curl -O 'https://dl.google.com/go/go1.10.src.tar.gz'
 

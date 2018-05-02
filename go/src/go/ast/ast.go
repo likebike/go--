@@ -524,8 +524,8 @@ func NewIdent(name string) *Ident { return &Ident{token.NoPos, name, nil} }
 // (that is, whether it begins with an upper-case letter).
 //
 func OrigIsExported(name string) bool {           //
-	ch, _ := utf8.DecodeRuneInString(name)        //
-	return unicode.IsUpper(ch)                    //
+    ch, _ := utf8.DecodeRuneInString(name)        //
+    return unicode.IsUpper(ch)                    //
 }                                                 //
 func IsExported(name string) bool {  return true  // Edit for Go--
 	ch, _ := utf8.DecodeRuneInString(name)
