@@ -4,7 +4,7 @@ Remember, with great power comes great responsibility.  Please don't complain if
 Go-- just consists of several single-line edits to the Go src/ tree.
 Here is how you can easily see the diff:
 
-    git diff go1.10 go--1.10 go/
+    git diff go1.10.2 go--1.10.2 go/
 
 
 Here is a quick summary of how to build Go--.  It's exactly the same process as building normal Go:
@@ -18,7 +18,7 @@ Here is a quick summary of how to build Go--.  It's exactly the same process as 
 
     git clone https://github.com/likebike/go--
     cd go--
-    git checkout go--1.10
+    git checkout go--1.10.2
     cd go/src
     ./make.bash
 
@@ -75,5 +75,5 @@ Here is how we upgrade when new versions of Go are released:
 
 Other Notes:
     # I'm in China, so I often need to proxy my connections:
-    ALL_PROXY='socks5h://127.0.0.1:1080' curl -O 'https://dl.google.com/go/go1.10.src.tar.gz'
+    ALL_PROXY='socks5h://127.0.0.1:1080' curl -O 'https://dl.google.com/go/go1.10.2.src.tar.gz'
 
