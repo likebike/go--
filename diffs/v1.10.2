@@ -1,0 +1,311 @@
+diff --git a/go/src/cmd/compile/internal/gc/export.go b/go/src/cmd/compile/internal/gc/export.go
+index c5d5c52..f2f855f 100644
+--- a/go/src/cmd/compile/internal/gc/export.go
++++ b/go/src/cmd/compile/internal/gc/export.go
+@@ -13,6 +13,7 @@ import (
+ 	"fmt"
+ 	"unicode"
+ 	"unicode/utf8"
++    "strings"  // Edit for Go--
+ )
+ 
+ var (
+@@ -53,7 +54,7 @@ func exportsym(n *Node) {
+ 	exportlist = append(exportlist, n)
+ }
+ 
+-func exportname(s string) bool {
++func exportname(s string) bool {  return !strings.Contains(s, ".") // Edit for Go--
+ 	if r := s[0]; r < utf8.RuneSelf {
+ 		return 'A' <= r && r <= 'Z'
+ 	}
+diff --git a/go/src/cmd/compile/internal/gc/main.go b/go/src/cmd/compile/internal/gc/main.go
+index b651c9a..2389173 100644
+--- a/go/src/cmd/compile/internal/gc/main.go
++++ b/go/src/cmd/compile/internal/gc/main.go
+@@ -1138,9 +1138,9 @@ func pkgnotused(lineno src.XPos, path string, name string) {
+ 		elem = elem[i+1:]
+ 	}
+ 	if name == "" || elem == name {
+-		yyerrorl(lineno, "imported and not used: %q", path)
++		Warnl(lineno, "imported and not used: %q", path)  // Edit for Go--
+ 	} else {
+-		yyerrorl(lineno, "imported and not used: %q as %s", path, name)
++		Warnl(lineno, "imported and not used: %q as %s", path, name)  // Edit for Go--
+ 	}
+ }
+ 
+diff --git a/go/src/cmd/compile/internal/gc/subr.go b/go/src/cmd/compile/internal/gc/subr.go
+index e0925dc..c9f8a49 100644
+--- a/go/src/cmd/compile/internal/gc/subr.go
++++ b/go/src/cmd/compile/internal/gc/subr.go
+@@ -285,7 +285,7 @@ func importdot(opkg *types.Pkg, pack *Node) {
+ 
+ 	if n == 0 {
+ 		// can't possibly be used - there were no symbols
+-		yyerrorl(pack.Pos, "imported and not used: %q", opkg.Path)
++		Warnl(pack.Pos, "imported and not used: %q", opkg.Path)  // Edit for Go--
+ 	}
+ }
+ 
+diff --git a/go/src/cmd/compile/internal/gc/typecheck.go b/go/src/cmd/compile/internal/gc/typecheck.go
+index 5285cb2..be0c2e0 100644
+--- a/go/src/cmd/compile/internal/gc/typecheck.go
++++ b/go/src/cmd/compile/internal/gc/typecheck.go
+@@ -2153,7 +2153,7 @@ func typecheck1(n *Node, top int) *Node {
+ 
+ 	if (top&Etop != 0) && top&(Ecall|Erv|Etype) == 0 && ok&Etop == 0 {
+ 		if !n.Diag() {
+-			yyerror("%v evaluated but not used", n)
++			yyerror("%v evaluated but not used", n)  // Go-- Note: If we change this to 'Warn' it results in an internal compiler error, so just leave it as 'yyerror'.
+ 			n.SetDiag(true)
+ 		}
+ 
+diff --git a/go/src/cmd/compile/internal/gc/walk.go b/go/src/cmd/compile/internal/gc/walk.go
+index ca3025b..7cc1025 100644
+--- a/go/src/cmd/compile/internal/gc/walk.go
++++ b/go/src/cmd/compile/internal/gc/walk.go
+@@ -48,10 +48,10 @@ func walk(fn *Node) {
+ 			if defn.Left.Name.Used() {
+ 				continue
+ 			}
+-			yyerrorl(defn.Left.Pos, "%v declared and not used", ln.Sym)
++			Warnl(defn.Left.Pos, "%v declared and not used", ln.Sym)  // Edit for Go--
+ 			defn.Left.Name.SetUsed(true) // suppress repeats
+ 		} else {
+-			yyerrorl(ln.Pos, "%v declared and not used", ln.Sym)
++			Warnl(ln.Pos, "%v declared and not used", ln.Sym)  // Edit for Go--
+ 		}
+ 	}
+ 
+diff --git a/go/src/cmd/compile/internal/syntax/parser.go b/go/src/cmd/compile/internal/syntax/parser.go
+index c8dfc96..f28bdd3 100644
+--- a/go/src/cmd/compile/internal/syntax/parser.go
++++ b/go/src/cmd/compile/internal/syntax/parser.go
+@@ -364,6 +364,7 @@ func isEmptyFuncDecl(dcl Decl) bool {
+ //        "{" { f sep } "}" . // sep is optional before ")" or "}"
+ //
+ func (p *parser) list(open, sep, close token, f func() bool) src.Pos {
++    p.pokeToken(open) // Go--
+ 	p.want(open)
+ 
+ 	var done bool
+@@ -516,6 +517,7 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
+ 	f := new(FuncDecl)
+ 	f.pos = p.pos()
+ 
++    p.pokeToken(_Lparen) // Go--
+ 	if p.tok == _Lparen {
+ 		rcvr := p.paramList()
+ 		switch len(rcvr) {
+@@ -529,6 +531,7 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
+ 		}
+ 	}
+ 
++    p.pokeToken(_Name) // Go--
+ 	if p.tok != _Name {
+ 		p.syntax_error("expecting name or (")
+ 		p.advance(_Lbrace, _Semi)
+@@ -537,6 +540,8 @@ func (p *parser) funcDeclOrNil() *FuncDecl {
+ 
+ 	f.Name = p.name()
+ 	f.Type = p.funcType()
++
++    p.pokeToken(_Lbrace) // Go--
+ 	if p.tok == _Lbrace {
+ 		f.Body = p.funcBody()
+ 	}
+@@ -1207,6 +1212,7 @@ func (p *parser) funcResult() []*Field {
+ 		defer p.trace("funcResult")()
+ 	}
+ 
++    p.pokeToken(_Lparen) // Go--
+ 	if p.tok == _Lparen {
+ 		return p.paramList()
+ 	}
+@@ -1819,6 +1825,48 @@ done:
+ 	return
+ }
+ 
++
++// Convenience method for Go-- :
++func (p *parser) peekToken(tok token) bool {
++    if p.tok==tok { return true }
++    tokStartI:=p.scanner.source.r
++    for ; tokStartI<len(p.scanner.source.buf); tokStartI++ {
++        c:=p.scanner.source.buf[tokStartI]
++        if c==' ' || c=='\t' || c=='\n' || c=='\r' || c==';' { continue }
++        break
++    }
++    if tok==_Name {
++        // A 'name' token can match any identifier, not just the string "name".
++        if tokStartI>=len(p.scanner.source.buf) { return false }
++        if !p.scanner.isIdentRune(rune(p.scanner.source.buf[tokStartI]),true) { return false } // Just test the first char.
++    } else {
++        var I int
++        for i,b:=range []byte(tokstrings[tok]) {
++            I=i
++            if tokStartI+i>=len(p.scanner.source.buf) { return false }
++            if p.scanner.source.buf[tokStartI+i]!=b { return false }
++        }
++        // The token matched the buffer!
++        switch tok {
++        case _Lparen,_Lbrace,_Lbrack: // Nothing extra for structural tokens.
++        case _Else:
++            // Make sure the input keyword has ended to avoid getting confused by variable names like 'elseList':
++            if tokStartI+I+1<len(p.scanner.source.buf) && p.scanner.isIdentRune(rune(p.scanner.source.buf[tokStartI+I+1]),false) { return false }
++        default: panic(fmt.Errorf("Unrecognized token: %s", tok))
++        }
++    }
++    return true
++}
++func (p *parser) pokeToken(tok token) {
++    if !(p.tok==_Semi && p.lit=="newline") { return }
++    if !p.peekToken(tok) { return }
++    for p.tok!=tok {
++        if p.tok!=_Semi { panic(fmt.Errorf("I should never skip this type of token: %s", p.tok)) }
++        p.next()
++        if p.tok==_EOF { panic(fmt.Errorf("Expected to find '%s' but reached EOF!", tokstrings[tok])) }
++    }
++}
++
+ func (p *parser) ifStmt() *IfStmt {
+ 	if trace {
+ 		defer p.trace("ifStmt")()
+@@ -1830,6 +1878,8 @@ func (p *parser) ifStmt() *IfStmt {
+ 	s.Init, s.Cond, _ = p.header(_If)
+ 	s.Then = p.blockStmt("if clause")
+ 
++    p.pokeToken(_Else) // Go-- support for `if cond {...} \n else {...}` syntax.
++
+ 	if p.got(_Else) {
+ 		switch p.tok {
+ 		case _If:
+diff --git a/go/src/cmd/compile/internal/syntax/scanner.go b/go/src/cmd/compile/internal/syntax/scanner.go
+index 05391e5..79f485e 100644
+--- a/go/src/cmd/compile/internal/syntax/scanner.go
++++ b/go/src/cmd/compile/internal/syntax/scanner.go
+@@ -56,6 +56,12 @@ func (s *scanner) next() {
+ 	nlsemi := s.nlsemi
+ 	s.nlsemi = false
+ 
++    // Go-- support for 'shebang' lines:
++    if s.source.line0<=linebase && s.source.col0<=colbase {  // BOM does not affect 'col'.
++        if s.getr()=='#' && s.source.r<len(s.source.buf) && s.source.buf[s.source.r]=='!' { s.skipLine('#')
++        } else { s.ungetr() }
++    }
++
+ redo:
+ 	// skip white space
+ 	c := s.getr()
+diff --git a/go/src/cmd/go/internal/test/testflag.go b/go/src/cmd/go/internal/test/testflag.go
+index 8a686b7..333b839 100644
+--- a/go/src/cmd/go/internal/test/testflag.go
++++ b/go/src/cmd/go/internal/test/testflag.go
+@@ -87,6 +87,7 @@ func init() {
+ //	go test fmt -custom-flag-for-fmt-test
+ //	go test -x math
+ func testFlags(args []string) (packageNames, passToTest []string) {
++	testVetList="off"  // Go-- and vet are not friends.  Disable by default.
+ 	inPkg := false
+ 	var explicitArgs []string
+ 	for i := 0; i < len(args); i++ {
+diff --git a/go/src/cmd/go/internal/version/version.go b/go/src/cmd/go/internal/version/version.go
+index c3f7d73..18ece38 100644
+--- a/go/src/cmd/go/internal/version/version.go
++++ b/go/src/cmd/go/internal/version/version.go
+@@ -24,5 +24,5 @@ func runVersion(cmd *base.Command, args []string) {
+ 		cmd.Usage()
+ 	}
+ 
+-	fmt.Printf("go version %s %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
++	fmt.Printf("go-- version %s %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH)
+ }
+diff --git a/go/src/cmd/link/internal/ld/deadcode.go b/go/src/cmd/link/internal/ld/deadcode.go
+index c5c48e5..55bcc48 100644
+--- a/go/src/cmd/link/internal/ld/deadcode.go
++++ b/go/src/cmd/link/internal/ld/deadcode.go
+@@ -146,7 +146,7 @@ type methodref struct {
+ 
+ func (m methodref) ifn() *sym.Symbol { return m.r[1].Sym }
+ 
+-func (m methodref) isExported() bool {
++func (m methodref) isExported() bool {  return true // Edit for Go--
+ 	for _, r := range m.m {
+ 		return unicode.IsUpper(r)
+ 	}
+diff --git a/go/src/go/ast/ast.go b/go/src/go/ast/ast.go
+index c07dd5a..dcba889 100644
+--- a/go/src/go/ast/ast.go
++++ b/go/src/go/ast/ast.go
+@@ -523,7 +523,11 @@ func NewIdent(name string) *Ident { return &Ident{token.NoPos, name, nil} }
+ // IsExported reports whether name is an exported Go symbol
+ // (that is, whether it begins with an upper-case letter).
+ //
+-func IsExported(name string) bool {
++func OrigIsExported(name string) bool {           //
++    ch, _ := utf8.DecodeRuneInString(name)        //
++    return unicode.IsUpper(ch)                    //
++}                                                 //
++func IsExported(name string) bool {  return true  // Edit for Go--
+ 	ch, _ := utf8.DecodeRuneInString(name)
+ 	return unicode.IsUpper(ch)
+ }
+diff --git a/go/src/go/scanner/scanner.go b/go/src/go/scanner/scanner.go
+index a86e4eb..da2f8b9 100644
+--- a/go/src/go/scanner/scanner.go
++++ b/go/src/go/scanner/scanner.go
+@@ -132,6 +132,18 @@ func (s *Scanner) Init(file *token.File, src []byte, err ErrorHandler, mode Mode
+ 	if s.ch == bom {
+ 		s.next() // ignore BOM at file beginning
+ 	}
++
++    // Go-- support for 'shebang' lines:
++    if s.ch=='#' {
++        reset:=func(ch rune, offset, rdOffset int) { s.ch,s.offset,s.rdOffset = ch,offset,rdOffset } // Logic based on findLineEnd().
++        peek:=func() rune {
++            defer reset(s.ch, s.offset, s.rdOffset)
++            s.next()
++            return s.ch
++        }
++        skipLine:=func() { for s.ch>=0 && s.ch!='\n' { s.next() } }
++        if peek()=='!' { skipLine() }
++    }
+ }
+ 
+ func (s *Scanner) error(offs int, msg string) {
+diff --git a/go/src/go/types/universe.go b/go/src/go/types/universe.go
+index 07d7078..0fb30cf 100644
+--- a/go/src/go/types/universe.go
++++ b/go/src/go/types/universe.go
+@@ -10,6 +10,7 @@ import (
+ 	"go/constant"
+ 	"go/token"
+ 	"strings"
++    "go/ast"  // For Go--
+ )
+ 
+ var (
+@@ -211,7 +212,8 @@ func def(obj Object) {
+ 	}
+ 	// exported identifiers go into package unsafe
+ 	scope := Universe
+-	if obj.Exported() {
++	//if obj.Exported() {                  // Edit for Go-- .  Without this, it doesn't know how to handle predeclared Consts like 'true'.
++	if ast.OrigIsExported(obj.Name()) {    //
+ 		scope = Unsafe.scope
+ 		// set Pkg field
+ 		switch obj := obj.(type) {
+diff --git a/go/src/reflect/type.go b/go/src/reflect/type.go
+index 171fc07..6939067 100644
+--- a/go/src/reflect/type.go
++++ b/go/src/reflect/type.go
+@@ -473,7 +473,7 @@ func (n name) data(off int, whySafe string) *byte {
+ 	return (*byte)(add(unsafe.Pointer(n.bytes), uintptr(off), whySafe))
+ }
+ 
+-func (n name) isExported() bool {
++func (n name) isExported() bool { return true // Go--
+ 	return (*n.bytes)&(1<<0) != 0
+ }
+ 
